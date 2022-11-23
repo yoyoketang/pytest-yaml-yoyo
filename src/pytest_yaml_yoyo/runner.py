@@ -37,7 +37,8 @@ class RunYaml(object):
                         pass          # noqa
                     elif item == 'request':
                         request_session = args.get('requests_session')  # session 请求会话
-                        self.context.update(self.module_variable)    # 加载模块变量
+                        if isinstance(self.module_variable, dict):
+                            self.context.update(self.module_variable)    # 加载模块变量
                         request_value = render_template_obj.rend_template_any(value, **self.context)
                         response = request_session.send_request(
                             method=str(request_value.pop('method')).upper(),
