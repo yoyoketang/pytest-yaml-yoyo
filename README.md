@@ -1,4 +1,4 @@
-# 前言
+# 说明
 
 基于 httprunner 框架的用例结构，我自己开发了一个pytest + yaml 的框架，那么是不是重复造轮子呢？
 不可否认 httprunner 框架设计非常优秀，但是也有缺点，httprunner3.x的版本虽然也是基于pytest框架设计，结合yaml执行用例，但是会生成一个py文件去执行。
@@ -11,16 +11,18 @@ Python 3.8版本
 Pytest 7.2.0 最新版
 
 pip 安装插件
+
 ```
 pip install pytest-yaml-yoyo
 ```
 
 
-# 第一个 helloworld
+# 第一个 hello world
 
 yaml 用例编写规则，跟pytest识别默认规则一样，必须是test 开头的，以`.yml` 结尾的文件才会被识别
 
 新建一个`test_hello.yml`文件
+
 ```
 config:
   name: yy
@@ -31,8 +33,8 @@ teststeps:
   print: hello world
 ```
 
-用例整体结构延续了httprunner框架的用例结果，主要是为了大家快速上手，减少新的规则学习
-- config  是必须的里面必须有name 用例名称，base_url 和 variables 是可选的
+用例整体结构延续了 httprunner 框架的用例结果，主要是为了大家快速上手，减少新的规则学习
+- config  是必须的里面必须有 name 用例名称，base_url 和 variables 是可选的
 - teststeps 用例的步骤，用例步骤是一个array 数组类型，可以有多个步骤
 
 从上面的运行可以看出，request 不是必须的，我们可以直接调用python内置函数print 去打印一些内容了。
@@ -41,6 +43,7 @@ teststeps:
 
 以`http://www.example.com/` get 请求示例
 test_get_demo.yml
+
 ```
 config:
   name: get
@@ -55,14 +58,15 @@ teststeps:
     - eq: [status_code, 200]
 ```
 
-命令行输入pytest后直接运行
+命令行输入 pytest 后直接运行
+
 ```
 >pytest
 ======================= test session starts =======================
 platform win32 -- Python 3.8.5, pytest-7.2.0, pluggy-1.0.0
 rootdir: D:\demo\yaml_yoyo
 plugins: yaml-yoyo-1.0.1
-collected 2 items
+collected 2 items                                                  
 
 test_get_demo.yml .                                          [ 50%]
 test_hello.yml .                                             [100%]
@@ -98,6 +102,7 @@ teststeps:
 # validate校验
 
 比如返回的response内容
+
 ```
 HTTP/1.1 200 OK
 Date: Wed, 23 Nov 2022 06:26:25 GMT
@@ -109,22 +114,22 @@ Access-Control-Allow-Origin: *
 Access-Control-Allow-Credentials: true
 
 {
-  "args": {},
-  "data": "{\r\n    \"username\": \"test\",\r\n    \"password\": \"123456\"\r\n}",
-  "files": {},
-  "form": {},
+  "args": {}, 
+  "data": "{\r\n    \"username\": \"test\",\r\n    \"password\": \"123456\"\r\n}", 
+  "files": {}, 
+  "form": {}, 
   "headers": {
-    "Content-Length": "55",
-    "Content-Type": "application/json",
-    "Host": "httpbin.org",
-    "User-Agent": "Fiddler",
+    "Content-Length": "55", 
+    "Content-Type": "application/json", 
+    "Host": "httpbin.org", 
+    "User-Agent": "Fiddler", 
     "X-Amzn-Trace-Id": "Root=1-637dbd11-7d9943ba1fb93a9331f6cf8d"
-  },
+  }, 
   "json": {
-    "password": "123456",
+    "password": "123456", 
     "username": "test"
-  },
-  "origin": "198.187.30.113",
+  }, 
+  "origin": "198.187.30.113", 
   "url": "http://httpbin.org/post"
 }
 
@@ -141,8 +146,8 @@ Access-Control-Allow-Credentials: true
 # 变量的声明与引用
 
 变量的声明，只支持在config 声明整个yml文件的全局变量（不支持单个step的变量，减少学习成本）
-在httprunner里面变量引用语法是`$user`, 引用函数是`${function()}`
-我这里统一改成了一个语法变量引用`${var}` 和 引用函数`${function()}`
+在 httprunner 里面变量引用语法是`$user`, 引用函数是`${function()}`
+我这里统一改成了一个语法变量引用`${var}` 和 引用函数`${function()}` 
 （表面上没多大变量，实际上功能强大了很多，使用了强大的jinja2 模板引擎)
 可以在引用函数后继续对结果操作， 这就解决了很多人提到了函数返回一个list，如何在yaml中取某一个值的问题
 
