@@ -20,8 +20,8 @@ class RunYaml(object):
     def run(self):
         # config 获取用例名称 name 和 base_url
         case_name = self.raw.get('config').get('name', '')
-        base_url = self.raw.get('config').get('base_url')
-        config_variables = self.raw.get('config').get('variables')
+        base_url = self.raw.get('config').get('base_url', None)
+        config_variables = self.raw.get('config').get('variables', {})
         # 模块变量渲染
         self.context.update(__builtins__)  # noqa 内置函数加载
         self.context.update(my_builtins.__dict__)  # 自定义函数对象
@@ -46,6 +46,14 @@ class RunYaml(object):
                             base_url=base_url,
                             **request_value
                         )
+                    elif item == 'extract':
+                        # 提取变量
+                        extract_value = render_template_obj.rend_template_any(value, **self.context)
+                        extract_result = self.extract_response(response, extract_value)
+                        # 添加到模块变量
+                        self.module_variable.update(extract_result)
+                        if isinstance(self.module_variable, dict):
+                            self.context.update(self.module_variable)    # 加载模块变量
                     elif item == 'validate':
                         validate_value = render_template_obj.rend_template_any(value, **self.context)
                         self.validate_response(response, validate_value)
@@ -69,6 +77,18 @@ class RunYaml(object):
 
         # 向 module 中加入函数
         setattr(self.module, str(self.module.__name__), f)
+
+    @staticmethod
+    def extract_response(response, extract_obj: dict):
+        """提取返回结果, 添加到module_variable 模块变量"""
+        extract_result = {}
+        if isinstance(extract_obj, dict):
+            for extract_var, extract_expression in extract_obj.items():
+                extract_var_value = extract.extract_by_object(response, extract_expression)  # 实际结果
+                extract_result[extract_var] = extract_var_value
+            return extract_result
+        else:
+            return extract_result
 
     @staticmethod
     def validate_response(response, validate_check: list) -> None:

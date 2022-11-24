@@ -178,71 +178,8 @@ teststeps:
 ![](https://img2022.cnblogs.com/blog/1070438/202211/1070438-20221123143938244-1854561508.png)
 
 # extract 提取接口返回参数关联
-在自动化用例中，我们经常会看到有人提问，上一个接口的返回的结果，如何取出来给到下个接口的入参。
-我们用 extract 关键字提取接口的返回结果（需要更新v1.0.2版本）。
 
-举个例子
-用个post请求`http://httpbin.org/post`
-```
-POST http://httpbin.org/post HTTP/1.1
-User-Agent: Fiddler
-Host: httpbin.org
-Content-Length: 0
-
-HTTP/1.1 200 OK
-Date: Thu, 24 Nov 2022 06:18:03 GMT
-Content-Type: application/json
-Content-Length: 320
-Connection: keep-alive
-Server: gunicorn/19.9.0
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Credentials: true
-
-{
-  "args": {}, 
-  "data": "", 
-  "files": {}, 
-  "form": {}, 
-  "headers": {
-    "Content-Length": "0", 
-    "Host": "httpbin.org", 
-    "User-Agent": "Fiddler", 
-    "X-Amzn-Trace-Id": "Root=1-637f0c9a-23b419f4180f6b843ba941af"
-  }, 
-  "json": null, 
-  "origin": "66.112.216.24", 
-  "url": "http://httpbin.org/post"
-}
-```
-比如我需要提取返回接口里面的url参数，那么我们用extract 关键字
-
-test_demo.yml 文件示例
-```
-config:
-  name: post示例
-
-teststeps:
--
-  name: post
-  request:
-    method: POST
-    url: http://httpbin.org/post
-    json:
-      username: test
-      password: "123456"
-  extract:
-      url:  body.url
-  validate:
-    - eq: [status_code, 200]
-    - eq: [headers.Server, gunicorn/19.9.0]
-    - eq: [$..username, test]
-    - eq: [body.json.username, test]
-```
-
-# 参数关联
-
-上一个接口提取到了url 变量，接下来在下个接口中引用`${url}`
-
+extract 提取返回结果，提取表达式与上面response取值表达式一样
 ```
 config:
   name: post示例
@@ -270,12 +207,20 @@ teststeps:
     method: GET
     url: http://httpbin.org/get
     headers:
-      url: ${url}
+      url: ${url[:3]}
   validate:
     - eq: [status_code, 200]
 ```
+在httprunner提取表达式的基础上，我们扩展了新的功能，提取后，在引用的时候还可以切片取值
+比如上面先提取
+```
+extract:
+      url:  body.url
+```
+url 变量得到的值为"url": "http://httpbin.org/post"
 
-于是看到请求报文中引用成功
+我们在引用的时候，可以直接用python表达式`url[:3]`, 得到切片的值`htt`
+最终第二个请求的请求参数为
 ```
 GET http://httpbin.org/get HTTP/1.1
 Host: httpbin.org
@@ -283,69 +228,22 @@ User-Agent: python-requests/2.28.1
 Accept-Encoding: gzip, deflate, br
 Accept: */*
 Connection: keep-alive
-url: http://httpbin.org/post
-
+url: htt
 ```
-
-# extract 提取结果二次取值
-
-我们在上一篇提到**不能在yaml中对返回值重新二次取值。**, 
-这也是一些同学提到的问题，对于提取的结果，我想继续取值，比如他是一个字符串，在python中可以用切片取值
-那么，在 yaml 中如何实现？
-
-我重新设计的这个框架中，就可以支持python语法，直接用切片取值
-```
-headers:
-      url: ${url[:4]}
-```
-
-请求报文
-```
-GET http://httpbin.org/get HTTP/1.1
-Host: httpbin.org
-User-Agent: python-requests/2.28.1
-Accept-Encoding: gzip, deflate, br
-Accept: */*
-Connection: keep-alive
-url: http
-
-```
-
-**extract 取值语法**
-
-校验方式延续了httprunner的校验语法，可以支持response取值对象：status_code, url, ok, headers, cookies, text, json, encoding
-其中返回的是json格式，那么可以支持
-- jmespath 语法: body.json.username
-- jsonpath 语法: $..username
-- re 正则语法：'code: (.+?),'
-
-如果返回的不是json格式，那么可以用正则取值
 
 
 # 其它功能
 
-目前第一个版本只实现了一些基础功能，还有一些功能待实现。
+目前第一个版本只实现了一些基础功能，还有接口的提取extract功能还未实现。
 后续计划：
-- 1、全局使用一个 token，仅登录一次，完成全部用例测试
-- 2、yaml 中调用 fixture 功能实现
-- 3、辅助函数功能使用
-- 4、结合 allure 生成报告
-- 5、对 yaml 数据格式校验
-- 6、添加日志
-- 7、新增另外一套yaml用例规范
+1、完善extract功能
+2、实现多个接口步骤的参数关联
+3、结合 allure 生成报告
+4、赋值函数功能使用
+5、yaml 中调用 fixture 功能实现
+6、全局使用一个token，仅登录一次，完成全部用例测试
+7、对yaml数据格式校验
+8、添加日志
+9、新增另外一套yaml用例规范
 
 更多功能持续开发中....大家有好的建议想法也欢迎提出， 微信交流联系wx:283340479
-
-# 版本变更记录
-
-v1.0.0  -- 发布的第一个版本（已删除)
-v1.0.1  -- 可以安装的第一个版本
-1.实现基础的 pytest 命令 执行yaml 文件用例功能
-
-v1.0.2
-1.新增extract 关键字，在接口中提取返回结果
-2.参数关联，上一个接口的返回值可以作为下个接口的入参
-详细功能参阅 extract 关键字文档
-
-
-

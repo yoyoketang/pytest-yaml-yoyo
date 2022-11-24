@@ -8,11 +8,11 @@ from setuptools import setup
 setup(
     name='pytest-yaml-yoyo',
     url='https://github.com/yoyoketang/pytest-yaml-yoyo',
-    version='1.0',
+    version='1.0.2',
     author="上海-悠悠",
     author_email='283340479@qq.com',
     description='http/https API run by yaml',
-    long_description=open("README.rst").read(),
+    long_description=open("README.md", 'r', encoding='utf-8').read(),
     package_dir={"": "src"},
     packages=["pytest_yaml_yoyo"],
     classifiers=[

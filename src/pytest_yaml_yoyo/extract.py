@@ -12,6 +12,8 @@ def extract_by_object(response: Response, extract_expression: str):
     :param extract_expression: 取值表达式
     :return: 返回取值后的结果
     """
+    if not isinstance(extract_expression, str):
+        return extract_expression
     res = {
         "headers": response.headers,
         "cookies": dict(response.cookies)
@@ -32,9 +34,12 @@ def extract_by_object(response: Response, extract_expression: str):
             return extract_by_jsonpath(response_parse_dict, extract_expression)
         except Exception as msg:
             raise exceptions.ExtractExpressionError(f'expression:<{extract_expression}>, error: {msg}')
-    else:
-        # 其它取值 正则匹配
+    elif '.+?' in extract_expression or '.*?' in extract_expression:
+        # 正则匹配
         return extract_by_regex(response.text, extract_expression)
+    else:
+        # 其它非取值表达式，直接返回
+        return extract_expression
 
 def extract_by_jsonpath(extract_value: dict, extract_expression: str): # noqa
     """
@@ -43,6 +48,8 @@ def extract_by_jsonpath(extract_value: dict, extract_expression: str): # noqa
     :param extract_expression: eg: '$.code'
     :return: None或 提取的第一个值 或全部
     """
+    if not isinstance(extract_expression, str):
+        return extract_expression
     extract_value = jsonpath.jsonpath(extract_value, extract_expression)
     if not extract_value:
         return
@@ -63,6 +70,8 @@ def extract_by_jmespath(extract_obj: dict, extract_expression: str):  # noqa
     :param extract_expression: eg: 'body.code'
     :return: 未提取到返回None, 提取到返回结果
     """  # noqa
+    if not isinstance(extract_expression, str):
+        return extract_expression
     try:
         extract_value = jmespath.search(extract_expression, extract_obj)
         return extract_value
@@ -77,6 +86,8 @@ def extract_by_regex(extract_obj: str, extract_expression: str):
     :param extract_expression:
     :return:
     """
+    if not isinstance(extract_expression, str):
+        return extract_expression
     extract_value = re.findall(extract_expression, extract_obj, flags=re.S)
     if not extract_value:
         return ''
