@@ -1,0 +1,41 @@
+config:
+    name: login case
+    base_url: http://124.70.221.221:8201
+    variables:
+        username: test
+        password: 123456
+
+teststeps:
+-
+    name: step login
+    request:
+        url: /api/v1/login
+        method: POST
+        json:
+            username: ${username}
+            password: "123456"
+    extract:
+        token: $.token
+    validate:
+        - eq: [status_code, 200]
+        - eq: [ok, true]
+        - eq: [headers.Server, WSGIServer/0.2 CPython/3.6.8]
+        - eq: [body.code, 0]
+        - eq: [$.code, 0]
+        - eq: [$.msg, login success!]
+        - eq: ['"code": (.+?),', '0']
+        - len_eq: ['${token}', 40]
+-
+    name: get goods
+    request:
+        url: /api/v2/goods
+        method: GET
+        headers:
+            Authorization: Token ${token}
+    validate:
+        - eq: [status_code, 200]
+        - eq: [body.code, 0]
+        - eq: [0, 0]
+
+
+

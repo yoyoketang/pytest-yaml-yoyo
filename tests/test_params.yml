@@ -1,0 +1,23 @@
+config:
+  name: post示例
+  fixtures: username, password
+  parameters:
+    - [test1, '123456']
+    - [test2, '123456']
+
+teststeps:
+-
+  name: post
+  request:
+    method: POST
+    url: http://httpbin.org/post
+    json:
+      username: ${username}
+      password: ${password}
+  extract:
+      url:  body.url
+  validate:
+    - eq: [status_code, 200]
+    - eq: [headers.Server, gunicorn/19.9.0]
+    - eq: [$..username, '${username}']
+    - eq: [body.json.username, '${username}']

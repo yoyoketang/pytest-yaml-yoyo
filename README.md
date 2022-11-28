@@ -321,18 +321,148 @@ url: http
 
 如果返回的不是json格式，那么可以用正则取值
 
+当一个用例用到多组测试数据的时候，我们必然会用到参数化，接下来看下如何在yaml文件中实现参数化
+
+# parameters 参数化的实现
+
+当一个用例用到多组测试数据的时候，我们必然会用到参数化，接下来看下如何在yaml文件中实现参数化
+用例参数化的实现，我设计了2种实现方式
+
+参数化方式1：
+```
+  config:
+     name: post示例
+     fixtures: username, password
+     parameters:
+       - [test1, '123456']
+       - [test2, '123456']
+```
+参数化方式2：
+```
+  config:
+     name: post示例
+     parameters:
+       - {"username": "test1", "password": "123456"}
+       - {"username": "test2", "password": "1234562"}
+```
+
+## 使用 fixtures 功能实现参数化
+
+基本实现原理参考 pytest 框架的参数化实现
+```
+import pytest
+@pytest.mark.parametrize("test_input,expected",
+                         [ ["3+5", 8],
+                           ["2+4", 6[,
+                           ["6 * 9", 42[,
+                         ])
+def test_eval(test_input, expected):
+    assert eval(test_input) == expected
+```
+在上面的用例中，只需要关注参数化的2个变量test_input, expected 也就是在测试用例中传的2个值，可以理解为用例的2个fixture参数
+还需要关注测试数据，测试数据结构必须是list，里面是可以迭代的数据，因为有2个变量，所以每组数据是2个值。
+
+在yaml文件中
+- 参数化需要的变量写到 config 的 fixtures 位置
+- 参数化需要的数据写到 parameters
+
+示例
+test_params.yml
+```
+# 作者-上海悠悠 微信/QQ交流:283340479
+# blog地址 https://www.cnblogs.com/yoyoketang/
+
+config:
+  name: post示例
+  fixtures: username, password
+  parameters:
+    - [test1, '123456']
+    - [test2, '123456']
+
+teststeps:
+-
+  name: post
+  request:
+    method: POST
+    url: http://httpbin.org/post
+    json:
+      username: ${username}
+      password: ${password}
+  extract:
+      url:  body.url
+  validate:
+    - eq: [status_code, 200]
+    - eq: [headers.Server, gunicorn/19.9.0]
+    - eq: [$..username, '${username}']
+    - eq: [body.json.username, '${username}']
+```
+运行yaml文件
+```
+pytest test_params.yml
+```
+会自动生成2个测试用例
+```
+(venv) D:\code\tests>pytest test_params.yml
+======================== test session starts ========
+platform win32 -- Python 3.8.5, pytest-7.2.0, pluggy-1.0.0
+rootdir: D:\code\pytest-yaml-yoyo
+plugins: yaml-yoyo-1.0.3
+collected 2 items                                                                                          
+
+test_params.yml ..                                   [100%]
+
+
+=================== 2 passed in 0.77s  ================
+```
+
+
+## parameters 实现参数化
+
+第二种实现方式，可以在fixtures 中传变量，但是测试数据必须是字典类型，从字典的key中动态读取变量名称
+test_params_2.yml
+```
+# 作者-上海悠悠 微信/QQ交流:283340479
+# blog地址 https://www.cnblogs.com/yoyoketang/
+config:
+  name: post示例
+  parameters:
+    - {"username": "tes1", "password": "123456"}
+    - {"username": "tes2", "password": "123456"}
+
+teststeps:
+-
+  name: post
+  request:
+    method: POST
+    url: http://httpbin.org/post
+    json:
+      username: ${username}
+      password: ${password}
+  extract:
+      url:  body.url
+  validate:
+    - eq: [status_code, 200]
+    - eq: [headers.Server, gunicorn/19.9.0]
+    - eq: [$..username, '${username}']
+    - eq: [body.json.username, '${username}']
+```
+
+运行yaml文件
+```
+pytest test_params.yml
+```
+
+以上2种实现参数化方式效果是一样的
 
 # 其它功能
 
 目前第一个版本只实现了一些基础功能，还有一些功能待实现。
 后续计划：
-- 1、全局使用一个 token，仅登录一次，完成全部用例测试
-- 2、yaml 中调用 fixture 功能实现
-- 3、辅助函数功能使用
-- 4、结合 allure 生成报告
-- 5、对 yaml 数据格式校验
-- 6、添加日志
-- 7、新增另外一套yaml用例规范
+- 1、结合 allure 生成报告
+- 2、辅助函数功能使用
+- 3、对 yaml 数据格式校验
+- 4、添加日志
+- 5、新增另外一套yaml用例规范
 
 更多功能持续开发中....大家有好的建议想法也欢迎提出， 微信交流联系wx:283340479
 
@@ -345,7 +475,10 @@ v1.0.1  -- 可以安装的第一个版本
 v1.0.2
 1.新增extract 关键字，在接口中提取返回结果
 2.参数关联，上一个接口的返回值可以作为下个接口的入参
-详细功能参阅 extract 关键字文档
+详细功能参阅 **extract** 关键字文档
 
-
+v1.0.3
+1.config 新增 fixtures 关键字，在yaml 用例中传fixture功能和参数化功能
+2.config 新增 parameters，用例参数化实现
+详细功能参阅 **parameters参数化** 关键字文档
 
