@@ -1,6 +1,6 @@
 config:
     name: login case
-    base_url: http://124.70.221.221:8201
+    base_url: http://127.0.0.1:8000
     variables:
         username: test
         password: 123456
