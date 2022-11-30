@@ -1,0 +1,19 @@
+config:
+  name: 引用内置函数
+  variables:
+    username: ${random_user()}
+teststeps:
+-
+  name: post
+  request:
+    method: POST
+    url: http://httpbin.org/post
+    json:
+      username: ${username}
+      password: "123456"
+  extract:
+      url:  body.url
+  validate:
+    - eq: [status_code, 200]
+    - eq: [$..username, '${username}']
+
