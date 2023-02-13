@@ -1,0 +1,9 @@
+name: post
+request:
+    method: POST
+    url: http://httpbin.org/post
+    json:
+        username: ${username}
+        password: "123456"
+validate:
+    - eq: [status_code, 200]

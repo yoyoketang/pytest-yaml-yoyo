@@ -1,0 +1,20 @@
+config:
+    name: login case
+    base_url: http://124.70.221.221:8201
+    variables:
+        username: "test123"
+        password: "123456"
+
+
+teststeps:
+-
+    name: step login1
+    api: api/login.yml
+    extract:
+        url:  body.url
+    validate:
+        - eq: [status_code, 200]
+        - eq: [ok, true]
+-
+    name: step login2
+    api: api/login.yml

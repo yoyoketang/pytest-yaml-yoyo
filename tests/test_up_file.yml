@@ -1,0 +1,9 @@
+文件上传:
+  name: upload file
+  request:
+      url: http://124.70.221.221:8201/api/v1/upfile/
+      method: POST
+      data:
+          title: 文件上传
+      files:
+          file: fenceng/abc.jpg

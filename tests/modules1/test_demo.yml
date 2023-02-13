@@ -1,0 +1,29 @@
+config:
+  name: post示例
+
+teststeps:
+-
+  name: post
+  request:
+    method: POST
+    url: http://httpbin.org/post
+    json:
+      username: test
+      password: "123456"
+  extract:
+      url:  body.url
+  validate:
+    - eq: [status_code, 200]
+    - eq: [headers.Server, gunicorn/19.9.0]
+    - eq: [$..username, test]
+    - eq: [body.json.username, test]
+
+-
+  name: post
+  request:
+    method: GET
+    url: http://httpbin.org/get
+    headers:
+      url: ${url[:4]}
+  validate:
+    - eq: [status_code, 200]

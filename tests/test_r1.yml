@@ -1,0 +1,20 @@
+config:
+  name: demo1
+
+get示例:
+  name: get demo
+  request:
+    method: GET
+    url: http://124.70.221.221:8201/api/test/demo
+  extract:
+    obj: $.data
+  validate:
+    - eq: [status_code, 200]
+
+ddd:
+  name: get demo
+  request:
+    method: GET
+    url: http://124.70.221.221:8201/api/test/demo
+    params:
+      key: ${rand_list(obj)}

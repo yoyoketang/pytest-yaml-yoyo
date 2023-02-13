@@ -1,0 +1,26 @@
+config:
+    variables:
+        user: test123
+
+用例1:
+    name: get
+    request:
+        method: GET
+        url: http://httpbin.org/get
+    extract:
+        url: body.url
+    validate:
+        - eq: [status_code, 200]
+
+用例2:
+-
+    name: post
+    request:
+        method: POST
+        url: http://httpbin.org/post
+        json:
+            url: ${url}
+            user: ${user}
+    validate:
+        - eq: [status_code, 200]
+
