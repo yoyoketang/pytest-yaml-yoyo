@@ -111,7 +111,10 @@ v1.1.2 发布时间 2022.12.16
 - 2.一个内置fake对象
 - 3.修复yaml文件为空或格式不正确时，执行报错的问题
 
-v1.1.3 发布时间 2023.2.13
+v1.1.3 发布时间 2022.12.17
+- 集成了 requests_toolbelt 插件处理Content-Type: multipart/form-data 类型文件上传接口
+
+v1.1.4 发布时间 2023.2.13
 
 新增3个关键字
 - 1.sleep  添加用例之间的sleep 等待时间
@@ -2455,6 +2458,7 @@ text 的内容，默认是上面的这些，支持markdown 文档格式，如果
 
 # 17 文件上传
 
+v1.1.3版本上实现文件上传
 本插件集成了 requests_toolbelt 插件处理`Content-Type: multipart/form-data` 类型文件上传接口。
 
 ## 17.1 文件上传multipart/form-data 
@@ -2517,7 +2521,7 @@ files 里面需要传的具体字段，需根据接口文档定义的参数名�
 
 # 18 sleep和skip、skipif 功能
 
-v1.1.3 发布新增3个关键字
+v1.1.4 发布新增3个关键字
 - 1.sleep  添加用例之间的sleep 等待时间
 - 2.skip   跳过用例功能
 - 3.skipif   条件为真时跳过用例
